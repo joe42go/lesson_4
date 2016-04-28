@@ -84,9 +84,7 @@ end
 
 def find_at_risk_square(line, board, marker)
   if board.values_at(*line).count(marker) == 2
-    board.select {|k, v| line.include?(k) && v == INITIAL_MARKER}.keys.first
-  else
-    nil
+    board.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   end
 end
 
@@ -107,7 +105,7 @@ def computer_places_piece!(brd)
   end
 
   if !square && brd[5] == INITIAL_MARKER
-      square = 5
+    square = 5
   end
 
   if !square
@@ -173,24 +171,16 @@ loop do
     end
   end
 
-  if first_turn == 'p'
-    current_player = "Player"
-  elsif first_turn == 'c'
-    current_player = "Computer"
-  else
-    current_player = "Player"
-  end
-
   loop do
     board = initialize_board
 
-    if first_turn == 'p'
-      current_player = "Player"
-    elsif first_turn == 'c'
-      current_player = "Computer"
-    else
-      current_player = "Player"
-    end
+    current_player = if first_turn == 'p'
+                       "Player"
+                     elsif first_turn == 'c'
+                       "Computer"
+                     else
+                       "Player"
+                     end
 
     loop do
       display_board(board)
@@ -237,7 +227,7 @@ loop do
       prompt("#{detect_winner(board)} won the entire game!")
       sleep 2
       break
-    elsif someone_won?(board) 
+    elsif someone_won?(board)
       prompt("#{detect_winner(board)} won this round!")
       prompt("Current Score is Player #{player_wins} vs. Computer #{computer_wins}")
       sleep 2
