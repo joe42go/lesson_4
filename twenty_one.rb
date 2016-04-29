@@ -71,10 +71,16 @@ end
 prompt("Welcome to the Game of Twenty-One")
 deck = initialize_deck
 
-deck.shuffle!
+deck.shuffle
+
+sleep 1
 
 loop do
   system 'clear'
+
+  if deck.count < 10
+  deck = initialize_deck.shuffle
+  end
 
   player_hand = []
   dealer_hand = []
@@ -129,6 +135,7 @@ loop do
     end
   end
 
+  puts "------------------------------------------------------------------"
   prompt("Would you like to play again? Press 'y' to continue or 'n' to quit")
   response = gets.chomp.downcase
   break unless response.start_with?('y')
