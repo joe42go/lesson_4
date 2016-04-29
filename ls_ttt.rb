@@ -22,8 +22,12 @@ def prompt(message)
   puts "=> #{message}"
 end
 
+def clear_screen
+  system('clear') || system('cls')
+end
+
 def display_board(brd)
-  system 'clear'
+  clear_screen
   puts "You're a #{PLAYER_MARKER}. Computer is a #{COMPUTER_MARKER}"
   puts ""
   puts "     |     |"
@@ -74,10 +78,11 @@ end
 def player_places_piece!(brd)
   square = ''
   loop do
-    prompt("Choose a square #{joinor(empty_squares(brd))}")
+    empty = empty_squares(brd)
+    prompt("Choose a square #{joinor(empty)}")
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
-    prompt("You need to enter a number that falls within #{empty_squares(brd).join(', ')}")
+    prompt("You need to enter a number that falls within #{empty.join(', ')}")
   end
   brd[square] = PLAYER_MARKER
 end
@@ -94,14 +99,8 @@ def computer_places_piece!(brd)
   square = nil
   WINNING_LINES.each do |line|
     square = find_at_risk_square(line, brd, COMPUTER_MARKER)
+    square = find_at_risk_square(line, brd, PLAYER_MARKER) if !square
     break if square
-  end
-
-  if !square
-    WINNING_LINES.each do |line|
-      square = find_at_risk_square(line, brd, PLAYER_MARKER)
-      break if square
-    end
   end
 
   if !square && brd[5] == INITIAL_MARKER
@@ -143,7 +142,7 @@ def detect_winner(brd)
   WINNING_LINES.each do |line|
     if brd.values_at(*line).count(PLAYER_MARKER) == 3
       return 'Player'
-    elsif brd.values_at(line[0], line[1], line[2]).count(COMPUTER_MARKER) == 3
+    elsif brd.values_at(*line).count(COMPUTER_MARKER) == 3
       return 'Computer'
     end
   end
@@ -160,14 +159,12 @@ loop do
   computer_wins = 0
   first_turn = nil
 
-  loop do
-    if CHOOSE_TURN == 'choose'
+  if CHOOSE_TURN == 'choose'
+    loop do
       prompt("Who would like to go first? Press 'c' for Computer or 'p' for Player")
       first_turn = gets.chomp.downcase
       break if first_turn == 'c' || first_turn == 'p'
       prompt("You need choose either 'c' or 'p'")
-    else
-      break
     end
   end
 
@@ -184,11 +181,11 @@ loop do
 
     loop do
       display_board(board)
+      break if someone_won?(board) || board_full?(board)
       place_piece!(board, current_player)
       current_player = alternate_player(current_player)
       player_wins = user_score(board, player_wins)
       computer_wins = computer_score(board, computer_wins)
-      break if someone_won?(board) || board_full?(board)
 
       # if first_turn == 'p'
       #   player_places_piece!(board)

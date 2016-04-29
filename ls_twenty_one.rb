@@ -8,6 +8,10 @@ def prompt(msg)
   puts "=> #{msg}"
 end
 
+def clear_screen
+  system('clear') || system('cls')
+end
+
 def initialize_deck
   SUITS.product(VALUES).shuffle
 end
@@ -140,10 +144,14 @@ loop do
   loop do
     sleep 3
 
-    system 'clear'
+    clear_screen
 
     player_cards = []
     dealer_cards = []
+
+    if deck.count < 10
+      deck = initialize_deck
+    end
 
     2.times do
       player_cards << deck.pop
