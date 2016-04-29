@@ -1,7 +1,7 @@
 SUITS = ['H', 'D', 'S', 'C'].freeze
 VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', 'J', 'Q', 'A'].freeze
 MAXIMUM_WINS = 5.freeze
-MAXIUM_NUMBER = 21.freeze
+MAXIMUM_NUMBER = 21.freeze
 DEALER_MINIMUM = 17.freeze
 
 def prompt(msg)
@@ -31,7 +31,7 @@ def total(cards)
   end
 
   values.select { |value| value == 'A' }.count.times do
-    sum -= 10 if sum > MAXIUM_NUMBER
+    sum -= 10 if sum > MAXIMUM_NUMBER
   end
 
   sum
@@ -45,9 +45,9 @@ def detect_result(dealer_cards, player_cards)
   player_total = total(player_cards)
   dealer_total = total(dealer_cards)
 
-  if player_total > MAXIUM_NUMBER
+  if player_total > MAXIMUM_NUMBER
     :player_busted
-  elsif dealer_total > MAXIUM_NUMBER
+  elsif dealer_total > MAXIMUM_NUMBER
     :dealer_busted
   elsif dealer_total < player_total
     :player
