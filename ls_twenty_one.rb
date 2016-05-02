@@ -1,8 +1,10 @@
+require 'pry'
+
 SUITS = ['H', 'D', 'S', 'C'].freeze
-VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', 'J', 'Q', 'A'].freeze
-MAXIMUM_WINS = 5.freeze
-MAXIMUM_NUMBER = 21.freeze
-DEALER_MINIMUM = 17.freeze
+VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'].freeze
+MAXIMUM_WINS = 5
+MAXIMUM_NUMBER = 21
+DEALER_MINIMUM = 17
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -14,6 +16,14 @@ end
 
 def initialize_deck
   SUITS.product(VALUES).shuffle
+end
+
+def reformat_cards(cards) # convert [['H', 'A'], ['D', '7'], ['S', '4']....['S', 'Q']] to "A, 7, 4...., Q"
+  result = ""
+  (cards.size - 1).times do |card|
+    result += (card[1] + ", ").to_s
+  end
+  result += cards[cards.size - 1][1]
 end
 
 def total(cards)
@@ -30,7 +40,7 @@ def total(cards)
     end
   end
 
-  values.select { |value| value == 'A' }.count.times do
+  values.select { |value| value == 'A' }.each do
     sum -= 10 if sum > MAXIMUM_NUMBER
   end
 
@@ -38,7 +48,7 @@ def total(cards)
 end
 
 def busted?(cards)
-  total(cards) > MAXIUM_NUMBER
+  total(cards) > MAXIMUM_NUMBER
 end
 
 def detect_result(dealer_cards, player_cards)
@@ -59,7 +69,7 @@ def detect_result(dealer_cards, player_cards)
 end
 
 def player_keep_score(player_wins, dealer_cards, player_cards)
-  result = detect_result(dealer_cards, player_cards) 
+  result = detect_result(dealer_cards, player_cards)
 
   case result
   when :dealer_busted
@@ -72,7 +82,7 @@ def player_keep_score(player_wins, dealer_cards, player_cards)
 end
 
 def computer_keep_score(computer_wins, dealer_cards, player_cards)
-  result = detect_result(dealer_cards, player_cards) 
+  result = detect_result(dealer_cards, player_cards)
 
   case result
   when :player_busted
@@ -85,19 +95,15 @@ def computer_keep_score(computer_wins, dealer_cards, player_cards)
 end
 
 def display_score(player_wins, computer_wins) # keeps track of number of wins for each side
+  puts "================================================"
   if player_wins == MAXIMUM_WINS
-    puts "================================================"
     prompt("Congratulations, Player collected #{MAXIMUM_WINS} wins. Player won the entire game!")
-    puts "================================================"
   elsif computer_wins == MAXIMUM_WINS
-    puts "================================================"
     prompt("Sorry, Computer has won #{MAXIMUM_WINS} times before you #sad_day")
-    puts "================================================"
   else
-    puts "================================================"
     prompt("Current Score is #{player_wins}(User):#{computer_wins}(Computer)")
-    puts "================================================"
   end
+  puts "================================================"
 end
 
 def display_result(dealer_cards, player_cards)
@@ -126,8 +132,8 @@ end
 
 def display_grand_output(dealer_cards, player_cards)
   puts "================================================"
-  prompt "Dealer has #{dealer_cards}, for a total of: #{total(dealer_cards)}"
-  prompt "Player has #{player_cards}, for a total of: #{total(player_cards)}"
+  prompt "Dealer has #{reformat_cards(dealer_cards)}, for a total of: #{total(dealer_cards)}"
+  prompt "Player has #{reformat_cards(player_cards)}, for a total of: #{total(player_cards)}"
   puts "================================================"
 end
 
@@ -158,8 +164,8 @@ loop do
       dealer_cards << deck.pop
     end
 
-    prompt "Dealer has #{dealer_cards[0]} and ?"
-    prompt "You have: #{player_cards[0]} and #{player_cards[1]}, for a total of #{total(player_cards)}."
+    prompt "Dealer has #{dealer_cards[0][1]} and ?"
+    prompt "You have: #{player_cards[0][1]} and #{player_cards[1][1]}, for a total of #{total(player_cards)}."
 
     loop do
       player_turn = nil
@@ -173,7 +179,7 @@ loop do
       if player_turn == 'h'
         player_cards << deck.pop
         prompt "You chose to hit!"
-        prompt "Your cards are now: #{player_cards}"
+        prompt "Your cards are now: #{reformat_cards(player_cards)}"
         prompt "Your total is now: #{total(player_cards)}"
       end
 
@@ -186,7 +192,6 @@ loop do
       computer_wins = computer_keep_score(computer_wins, dealer_cards, player_cards)
       display_score(player_wins, computer_wins)
       computer_wins == MAXIMUM_WINS ? break : next
-      # play_again? ? next : break 
       next
     else
       prompt "You stayed at #{total(player_cards)}"
@@ -200,7 +205,7 @@ loop do
 
       prompt "Dealer hits!"
       dealer_cards << deck.pop
-      prompt "Dealer's cards are now: #{dealer_cards}"
+      prompt "Dealer's cards are now: #{reformat_cards(dealer_cards)}"
     end
 
     dealer_total = total(dealer_cards)
@@ -211,18 +216,12 @@ loop do
       player_wins = player_keep_score(player_wins, dealer_cards, player_cards)
       display_score(player_wins, computer_wins)
       player_wins == MAXIMUM_WINS ? break : next
-      #play_again? ? next : break
       next
     else
       prompt "Dealer stays at #{dealer_total}"
     end
 
     display_grand_output(dealer_cards, player_cards)
-
-    # puts "================="
-    # prompt "Dealer has #{dealer_cards}, for a total of: #{total(dealer_cards)}"
-    # prompt "Player has #{player_cards}, for a total of: #{total(player_cards)}"
-    # puts "================="
 
     display_result(dealer_cards, player_cards)
     player_wins = player_keep_score(player_wins, dealer_cards, player_cards)
@@ -232,7 +231,7 @@ loop do
     break if player_wins == MAXIMUM_WINS || computer_wins == MAXIMUM_WINS
   end
 
-  break unless play_again? 
+  break unless play_again?
 end
 
 prompt "Thank you for playing Twenty-One! Good bye!"
