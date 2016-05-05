@@ -20,8 +20,8 @@ end
 
 def reformat_cards(cards) # convert [['H', 'A'], ['D', '7'], ['S', '4']....['S', 'Q']] to "A, 7, 4...., Q"
   result = ""
-  (cards.size - 1).times do |card|
-    result += (card[1] + ", ").to_s
+  cards.each_with_index do |card, idx|
+    result += card[1] + ", " unless idx == (cards.size - 1)
   end
   result += cards[cards.size - 1][1]
 end
@@ -68,31 +68,25 @@ def detect_result(dealer_cards, player_cards)
   end
 end
 
-def player_keep_score(player_wins, dealer_cards, player_cards)
-  result = detect_result(dealer_cards, player_cards)
-
-  case result
-  when :dealer_busted
-    player_wins + 1
-  when :player
-    player_wins + 1
-  else
-    player_wins
+def calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+  case detect_result(dealer_cards, player_cards)
+  when :player, :dealer_busted then player_wins + 1
+  when :dealer, :player_busted then computer_wins + 1
   end
 end
 
-def computer_keep_score(computer_wins, dealer_cards, player_cards)
-  result = detect_result(dealer_cards, player_cards)
+# def computer_keep_score(computer_wins, dealer_cards, player_cards)
+#   result = detect_result(dealer_cards, player_cards)
 
-  case result
-  when :player_busted
-    computer_wins + 1
-  when :dealer
-    computer_wins + 1
-  else
-    computer_wins
-  end
-end
+#   case result
+#   when :player_busted
+#     computer_wins + 1
+#   when :dealer
+#     computer_wins + 1
+#   else
+#     computer_wins
+#   end
+# end
 
 def display_score(player_wins, computer_wins) # keeps track of number of wins for each side
   puts "================================================"
@@ -111,14 +105,19 @@ def display_result(dealer_cards, player_cards)
 
   case result
   when :player_busted
+    display_grand_output(dealer_cards, player_cards)
     prompt "You busted! Dealer wins!"
   when :dealer_busted
+    display_grand_output(dealer_cards, player_cards)
     prompt "Dealer busted! You win!"
   when :player
+    display_grand_output(dealer_cards, player_cards)
     prompt "You win!"
   when :dealer
+    display_grand_output(dealer_cards, player_cards)
     prompt "Dealer wins!"
   else
+    display_grand_output(dealer_cards, player_cards)
     prompt "It's a tie!"
   end
 end
@@ -141,7 +140,7 @@ loop do
   prompt "Welcome to Twenty-One!"
   prompt "Objective is to win 5 times before the computer does"
 
-  sleep 2
+  sleep 1
 
   deck = initialize_deck
 
@@ -188,8 +187,7 @@ loop do
 
     if busted?(player_cards)
       display_result(dealer_cards, player_cards)
-      display_grand_output(dealer_cards, player_cards)
-      computer_wins = computer_keep_score(computer_wins, dealer_cards, player_cards)
+      computer_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
       display_score(player_wins, computer_wins)
       computer_wins == MAXIMUM_WINS ? break : next
       next
@@ -211,9 +209,8 @@ loop do
     dealer_total = total(dealer_cards)
     if busted?(dealer_cards)
       prompt "Dealer total is now: #{dealer_total}"
-      display_grand_output(dealer_cards, player_cards)
       display_result(dealer_cards, player_cards)
-      player_wins = player_keep_score(player_wins, dealer_cards, player_cards)
+      player_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
       display_score(player_wins, computer_wins)
       player_wins == MAXIMUM_WINS ? break : next
       next
@@ -221,11 +218,11 @@ loop do
       prompt "Dealer stays at #{dealer_total}"
     end
 
-    display_grand_output(dealer_cards, player_cards)
-
     display_result(dealer_cards, player_cards)
-    player_wins = player_keep_score(player_wins, dealer_cards, player_cards)
-    computer_wins = computer_keep_score(computer_wins, dealer_cards, player_cards)
+    case detect_result(dealer_cards, player_cards) 
+    when :player then player_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+    when :dealer then computer_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+    end
     display_score(player_wins, computer_wins)
 
     break if player_wins == MAXIMUM_WINS || computer_wins == MAXIMUM_WINS
