@@ -68,23 +68,10 @@ def detect_result(dealer_cards, player_cards)
   end
 end
 
-def calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
-  case detect_result(dealer_cards, player_cards)
-  when :player, :dealer_busted then player_wins + 1
-  when :dealer, :player_busted then computer_wins + 1
-  end
-end
-
-# def computer_keep_score(computer_wins, dealer_cards, player_cards)
-#   result = detect_result(dealer_cards, player_cards)
-
-#   case result
-#   when :player_busted
-#     computer_wins + 1
-#   when :dealer
-#     computer_wins + 1
-#   else
-#     computer_wins
+# def calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+#   case detect_result(dealer_cards, player_cards)
+#   when :player, :dealer_busted then player_wins + 1
+#   when :dealer, :player_busted then computer_wins + 1
 #   end
 # end
 
@@ -187,7 +174,7 @@ loop do
 
     if busted?(player_cards)
       display_result(dealer_cards, player_cards)
-      computer_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+      computer_wins += 1
       display_score(player_wins, computer_wins)
       computer_wins == MAXIMUM_WINS ? break : next
       next
@@ -210,7 +197,7 @@ loop do
     if busted?(dealer_cards)
       prompt "Dealer total is now: #{dealer_total}"
       display_result(dealer_cards, player_cards)
-      player_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+      player_wins += 1
       display_score(player_wins, computer_wins)
       player_wins == MAXIMUM_WINS ? break : next
       next
@@ -219,9 +206,10 @@ loop do
     end
 
     display_result(dealer_cards, player_cards)
-    case detect_result(dealer_cards, player_cards) 
-    when :player then player_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
-    when :dealer then computer_wins = calculate_wins(player_wins, computer_wins, dealer_cards, player_cards)
+    winner = detect_result(dealer_cards, player_cards) 
+    case winner
+    when :dealer_busted, :player then player_wins += 1 
+    when :player_busted, :dealer then computer_wins += 1
     end
     display_score(player_wins, computer_wins)
 
